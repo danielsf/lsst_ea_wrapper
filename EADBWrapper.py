@@ -28,16 +28,18 @@ class EADBWrapper(object):
         nameList = results['name']
         objIdList = results['ObjectID']
 
-        propertyIdList = []
+        propertyIdDict = {} 
         dtype = np.dtype([('PropertyID', np.int)])
-        for objId in objIdList:
+        for objId, name in zip(objIdList, nameList):
             query = "select t.PropertyID from t_objectproperties t where t.Object_ID = %d" % objId
             results = self._dbo.execute_arbitrary(query, dtype=dtype)
-            if len(results)!=1:
-                 raise RuntimeError("Not sure what to do; got more than one property in daughterObjectsFromID")
-            propertyIdList.append(results['PropertyID'][0])
+            if len(results)>1:
+                 raise RuntimeError("Not sure what to do; got %d property in daughterObjectsFromID" % len(results))
 
-        return nameList, objIdList, propertyIdList
+            if len(results)>0:
+                propertyIdDict[name] = results['PropertyID'][0]
+
+        return nameList, objIdList, propertyIdDict
 
     def showAttributesFromID(self, objID):
 
@@ -49,3 +51,4 @@ class EADBWrapper(object):
             print '    Units: ',results['Type'][ix]
             print '    Default: ',results['Default'][ix]
             print '    Notes: ',results['Notes'][ix]
+            print '\n'
