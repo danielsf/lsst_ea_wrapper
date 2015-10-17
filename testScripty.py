@@ -9,3 +9,4 @@ if __name__ == "__main__":
     print nameList
     print objList
     print propList
+    dbo.showAttributesFromID(objList[0])

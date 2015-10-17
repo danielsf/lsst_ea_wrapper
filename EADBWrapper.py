@@ -10,7 +10,7 @@ class EADBWrapper(object):
         self._dbo = DBObject(database='sysarch', host='terminal.lsst.org',
                              port='3306', driver='mysql')
 
-        self._objSearchDtype = np.dtype([('name', str, 100), ('ObjectID', np.int)])
+        self._objSearchDtype = np.dtype([('name', str, 300), ('ObjectID', np.int)])
 
 
     def objectIdFromName(self, name):
@@ -22,7 +22,7 @@ class EADBWrapper(object):
 
     def daughterObjectsFromID(self, parentID):
  
-        dtype = np.dtype([('name',str,100), ('ObjectID',np.int)])
+        dtype = np.dtype([('name', str, 300), ('ObjectID',np.int)])
         query = "select t.name, t.Object_ID from t_object t where t.ParentID = %d" % parentID
         results = self._dbo.execute_arbitrary(query, dtype=dtype)
         nameList = results['name']
@@ -38,3 +38,14 @@ class EADBWrapper(object):
             propertyIdList.append(results['PropertyID'][0])
 
         return nameList, objIdList, propertyIdList
+
+    def showAttributesFromID(self, objID):
+
+        dtype = np.dtype([('Name', str, 300), ('Notes', str, 300), ('Type', str, 100), ('Default', np.float)])
+        query = 'select t.Name, t.Notes, t.Type, t.Default from t_attribute t where t.Object_ID = %d' % objID
+        results = self._dbo.execute_arbitrary(query, dtype=dtype)
+        for ix in range(len(results)):
+            print results['Name'][ix]
+            print '    Units: ',results['Type'][ix]
+            print '    Default: ',results['Default'][ix]
+            print '    Notes: ',results['Notes'][ix]
