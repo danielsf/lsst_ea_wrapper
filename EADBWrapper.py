@@ -41,6 +41,7 @@ class EADBWrapper(object):
 
         return nameList, objIdList, propertyIdDict
 
+
     def showAttributesFromID(self, objID):
 
         dtype = np.dtype([('Name', str, 300), ('Notes', str, 300), ('Type', str, 100), ('Default', np.float)])
