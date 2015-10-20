@@ -1,8 +1,27 @@
 from __future__ import with_statement
 import unittest
-from EADBWrapper import EADBWrapper
+from EADBWrapper import EADBWrapper, SysMLObject
 
-class InheritanceTest(unittest.TestCase):
+
+class SysMLObjectTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.dbo = EADBWrapper()
+
+    def test_initialization(self):
+
+        obj = SysMLObject()
+        obj.getData(self.dbo, 385412)
+
+        self.assertTrue(385407 in obj.daughters)
+        self.assertTrue(385394 in obj.daughters)
+        self.assertTrue(385385 in obj.daughters)
+        self.assertTrue(385340 in obj.daughters)
+        self.assertTrue(385362 in obj.daughters)
+
+
+class EADBWrapperTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -55,6 +74,7 @@ class InheritanceTest(unittest.TestCase):
         self.assertTrue(385385 in daughters)
         self.assertTrue(385362 in daughters)
         self.assertTrue(385340 in daughters)
+
 
 
 if __name__ == "__main__":
