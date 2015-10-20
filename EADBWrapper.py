@@ -40,3 +40,6 @@ class EADBWrapper(object):
         if len(results)>1:
             raise RuntimeError('More than one object match the name you gave. '
                                'Try specifying an author or a version')
+
+        if len(results)==0:
+            raise RuntimeError('No objects matched the name you gave.')

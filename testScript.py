@@ -19,8 +19,17 @@ class InheritanceTest(unittest.TestCase):
         self.assertEqual(context.exception.args[0],
                          'More than one object match the name you gave. '
                          'Try specifying an author or a version')
-        
 
+
+    def test_no_options(self):
+        """
+        Make sure that an exception is raise if no objects are returned.
+        """
+
+        with self.assertRaises(RuntimeError) as context:
+            familyTree = self.dbo.getDaughters('blah blah blah')
+        self.assertEqual(context.exception.args[0],
+                         'No objects matched the name you gave.')
 
 if __name__ == "__main__":
     unittest.main()
