@@ -34,6 +34,11 @@ class EADBWrapper(object):
 
 
     def _getDaughtersFromObjID(self, objid):
+        """
+        Recursively return a list of Object_IDs corresponding to the objects
+        descended (either directly or indirectly) from an object specified by an
+        Object_ID
+        """
         query = self._object_query + " where t.ParentID=%d" % objid
         results = self._dbo.execute_arbitrary(query, dtype=self._object_dtype)
         ans = list(results["Object_ID"])
@@ -44,6 +49,21 @@ class EADBWrapper(object):
 
 
     def getFamilyIDs(self, name, author=None, version=None):
+        """
+        Get a list of the Object_IDs of all objects descended (directly or
+        indirectly) from a specified object
+
+        @param[in] name is a string denoting the name of the desired object
+
+        @param[in] author is an optional string denoting the author of the
+        desired object (in case there are multiple versions)
+
+        @param[in] version is an optional string denoting the version
+        of the desired object (in case there are multiple versions)
+
+        @param[out] a list of ints denoting the Object_IDs of all of
+        the objects beneath the desired object in its family tree.
+        """
         query = self._object_query + " where t.name='%s'" % name
 
         if author is not None:
