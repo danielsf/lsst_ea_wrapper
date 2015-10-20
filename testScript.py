@@ -1,6 +1,6 @@
 from __future__ import with_statement
 import unittest
-from EADBWrapper import EADBWrapper, SysMLObject
+from EADBWrapper import EADBWrapper, SysMLObject, SysMLObjectList
 
 
 class SysMLObjectTest(unittest.TestCase):
@@ -75,6 +75,12 @@ class EADBWrapperTest(unittest.TestCase):
         self.assertTrue(385362 in daughters)
         self.assertTrue(385340 in daughters)
 
+
+    def test_list(self):
+        daughters = self.dbo.getFamilyIDs('g-band Response Envelope',
+                                          author='Chuck Claver')
+
+        objList = SysMLObjectList(self.dbo, daughters)
 
 
 if __name__ == "__main__":

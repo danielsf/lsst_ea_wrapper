@@ -1,7 +1,7 @@
 import numpy as np
 from lsst.sims.catalogs.generation.db import DBObject
 
-__all__ = ["EADBWrapper", "SysMLObject"]
+__all__ = ["EADBWrapper", "SysMLObject", "SysMLObjectList"]
 
 class SysMLObject(object):
 
@@ -95,7 +95,7 @@ class SysMLObject(object):
         for ix in range(len(results)):
             attName = results['Name'][ix]
             self._attributes[attName] = {}
-            for column in dtype_list:
+            for column in dtypeList:
                 if column[0] != 'Name':
                     self._attributes[attName][column[0]] = results[column[0]][ix]
 
@@ -173,6 +173,81 @@ class SysMLObject(object):
         """
 
         return self._attributes
+
+
+class SysMLObjectList(object):
+
+    def __init__(self, dbo, objIdList):
+        self._objectList = []
+        for objid in objIdList:
+            obj = SysMLObject()
+            obj.getData(dbo, objid)
+            self._objectList.append(obj)
+
+        self._relationship_dict = {}
+
+        parentList = []
+        self._id_dict = {}
+        self._name_dict = {}
+        for ix, obj in enumerate(self._objectList):
+            if obj.objid in self._id_dict:
+                raise RuntimeError("ObjID %d repeated in SysMLObjectList" % obj.objid)
+
+            if obj.name in self._name_dict:
+                raise RuntimeError("Name %s repeated in SysMLObjectList" % obj.name)
+
+            self._id_dict[obj.objid] = ix
+            self._name_dict[obj.name] = ix
+            parentList.append(obj.parent)
+
+
+        self._getRelationships
+
+
+    def __len__(self):
+        return len(self._objectList)
+
+
+    def __getitem__(self, value):
+
+        if isinstance(value, str):
+            dex = self._name_dict[value]
+        else:
+            dex = self._id_dict[value]
+
+        return self._objectList[dex]
+
+
+    def __iter__(self):
+        for val in self._objectList:
+            yield val
+
+
+    def _getRelationships(self, dbo):
+
+        dtype = np.dtype([('label', str, 300)])
+        baseQuery = "select t.Btm_Mid_Label from t_connector "
+
+        for daughter in self._objectList:
+            if daughter.parent in self._id_dict:
+                parent = daughter.parent
+                query = baseQuery + "where t.Start_Object_ID=%d " % daughter \
+                                    + "and t.End_Object_ID=%d" % parent
+
+                results = dbo._dbo.execute_arbitrary(query, dtype=dtype)
+
+                if len(results)>1:
+                    raise RuntimeError("Your relationship query between %d and %d yielded %d results." \
+                                       %(daughter, parent, len(results)))
+
+
+                if len(results)>0:
+                    ans = results['label'][0].replace("\r\n","")
+
+                    if daughter not in self._relationship_dict:
+                        self._relationship_dict[daughter] = {}
+
+                    self._relationship_dict[daughter][parent] = ans
 
 
 
