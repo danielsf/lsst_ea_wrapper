@@ -33,8 +33,24 @@ class EADBWrapper(object):
         return results['ObjectID']
 
 
-    def getDaughters(self, name, author=None, version=None):
+    def _getDaughtersFromObjID(self, objid):
+        query = self._object_query + " where t.ParentID=%d" % objid
+        results = self._dbo.execute_arbitrary(query, dtype=self._object_dtype)
+        ans = list(results["Object_ID"])
+        for aa in results["Object_ID"]:
+            new_results = self._getDaughtersFromObjID(aa)
+            ans += new_results
+        return ans
+
+
+    def getFamilyIDs(self, name, author=None, version=None):
         query = self._object_query + " where t.name='%s'" % name
+
+        if author is not None:
+            query += " and t.Author='%s'" % author
+        if version is not None:
+            query += " and t.Version='%s'" % version
+
         results = self._dbo.execute_arbitrary(query, dtype=self._object_dtype)
 
         if len(results)>1:
@@ -43,3 +59,5 @@ class EADBWrapper(object):
 
         if len(results)==0:
             raise RuntimeError('No objects matched the name you gave.')
+
+        return list(results["Object_ID"]) + self._getDaughtersFromObjID(results["Object_ID"][0])

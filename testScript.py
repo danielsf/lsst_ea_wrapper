@@ -15,7 +15,7 @@ class InheritanceTest(unittest.TestCase):
         """
 
         with self.assertRaises(RuntimeError) as context:
-            familyTree = self.dbo.getDaughters('g-band Response Envelope')
+            familyTree = self.dbo.getFamilyIDs('g-band Response Envelope')
         self.assertEqual(context.exception.args[0],
                          'More than one object match the name you gave. '
                          'Try specifying an author or a version')
@@ -27,9 +27,35 @@ class InheritanceTest(unittest.TestCase):
         """
 
         with self.assertRaises(RuntimeError) as context:
-            familyTree = self.dbo.getDaughters('blah blah blah')
+            familyTree = self.dbo.getFamilyIDs('blah blah blah')
         self.assertEqual(context.exception.args[0],
                          'No objects matched the name you gave.')
+
+
+    def test_g_band_daughters(self):
+        """
+        Make sure that we get the full inheritance tree of
+        g-band Response Envelope
+
+        This verifies that things I 'know' are correct get returned
+        as daughters (i.e. things that are in Chuck's example diagram)
+
+        It does not verify the length of 'daughters' (if something
+        that is not in Chuck's diagram is in the inheritance tree,
+        that still shows up)
+        """
+
+        daughters = self.dbo.getFamilyIDs('g-band Response Envelope',
+                                          author='Chuck Claver')
+
+        self.assertTrue(385412 in daughters)
+        self.assertTrue(385333 in daughters)
+        self.assertTrue(385376 in daughters)
+        self.assertTrue(385394 in daughters)
+        self.assertTrue(385385 in daughters)
+        self.assertTrue(385362 in daughters)
+        self.assertTrue(385340 in daughters)
+
 
 if __name__ == "__main__":
     unittest.main()
