@@ -81,6 +81,7 @@ class EADBWrapperTest(unittest.TestCase):
                                           author='Chuck Claver')
 
         objList = SysMLObjectList(self.dbo, daughters)
+        print objList._relationship_dict
 
 
 if __name__ == "__main__":

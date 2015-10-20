@@ -49,6 +49,7 @@ class SysMLObject(object):
         self._name = results['Name'][0]
         self._author = results['Author'][0]
         self._version = results['Version'][0]
+        self._parentid = results['ParentID'][0]
 
         # get daughters
         dtype = np.dtype([('Object_ID', np.int)])
@@ -186,7 +187,7 @@ class SysMLObjectList(object):
 
         self._relationship_dict = {}
 
-        parentList = []
+        parents_of_objects = []
         self._id_dict = {}
         self._name_dict = {}
         for ix, obj in enumerate(self._objectList):
@@ -198,10 +199,18 @@ class SysMLObjectList(object):
 
             self._id_dict[obj.objid] = ix
             self._name_dict[obj.name] = ix
-            parentList.append(obj.parent)
+            parents_of_objects.append(obj.parent)
 
 
-        self._getRelationships
+        self._list_of_parents = [] # list of objects contained that are parents
+        self._list_of_children = [] # list of objects contained that are not parents
+        for obj in self._objectList:
+            if obj.objid in parents_of_objects:
+                self._list_of_parents.append(obj.objid)
+            else:
+                self._list_of_children.append(obj.objid)
+
+        self._getRelationships(dbo)
 
 
     def __len__(self):
@@ -224,13 +233,16 @@ class SysMLObjectList(object):
 
 
     def _getRelationships(self, dbo):
+        print 'getting relationships'
 
         dtype = np.dtype([('label', str, 300)])
-        baseQuery = "select t.Btm_Mid_Label from t_connector "
+        baseQuery = "select t.Btm_Mid_Label from t_connector t "
 
-        for daughter in self._objectList:
-            if daughter.parent in self._id_dict:
-                parent = daughter.parent
+        for daughterObj in self._objectList:
+            if daughterObj.parent in self._id_dict:
+                parent = daughterObj.parent
+                daughter = daughterObj.objid
+                print daughter, parent
                 query = baseQuery + "where t.Start_Object_ID=%d " % daughter \
                                     + "and t.End_Object_ID=%d" % parent
 
