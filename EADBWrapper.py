@@ -269,7 +269,6 @@ class SysMLObjectList(object):
 
 
     def _getRelationships(self, dbo):
-        print 'getting relationships'
 
         dtype = np.dtype([('label', str, 300)])
         baseQuery = "select t.Btm_Mid_Label from t_connector t "
@@ -278,7 +277,6 @@ class SysMLObjectList(object):
             if daughterObj.parent in self._id_dict:
                 parent = daughterObj.parent
                 daughter = daughterObj.objid
-                print daughter, parent
                 query = baseQuery + "where t.Start_Object_ID=%d " % daughter \
                                     + "and t.End_Object_ID=%d" % parent
 
@@ -298,7 +296,23 @@ class SysMLObjectList(object):
                     self._relationship_dict[daughter][parent] = ans
 
 
+    def writeFamilyTree(self, file_handle=sys.stdout):
+        for obj in self._objectList:
+            file_handle.write('========\n')
+            file_handle.write('Name: %s\n' % obj.name)
+            file_handle.write('Version: %s\n' % obj.version)
+            file_handle.write('Author: %s\n' % obj.author)
+            obj.printProperties(file_handle=file_handle)
+            if obj.objid in self._relationship_dict:
+                file_handle.write('Relationships:\n')
+                for parent in self._relationship_dict[obj.objid]:
+                    file_handle.write('    ')
+                    file_handle.write(self._relationship_dict[obj.objid][parent])
+                    file_handle.write(' %s\n' % self[parent].name)
+                file_handle.write('\n')
 
+            obj.printAttributes(file_handle=file_handle)
+            file_handle.write('========\n\n')
 
 
 class EADBWrapper(object):
