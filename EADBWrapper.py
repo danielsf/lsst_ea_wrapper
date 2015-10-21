@@ -196,7 +196,9 @@ class SysMLObject(object):
                 file_handle.write('%s\n' % self._properties[pp]['Notes'])
 
     def printAttributes(self, file_handle=sys.stdout):
-        file_handle.write('Attributes:\n')
+        if(len(self._attributes)>0):
+            file_handle.write('Attributes:\n')
+
         for aa in self._attributes:
             file_handle.write('    ------------\n')
             file_handle.write('    %s = %s %s\n' % (aa,self._attributes[aa]['Default'], self._attributes[aa]['Type']))
