@@ -178,6 +178,7 @@ class SysMLObject(object):
 
 
     def printObject(self):
+        print '********'
         print 'Name: ',self._name
         print 'Version: ',self._version
         print 'Author: ',self._author
@@ -286,6 +287,8 @@ class SysMLObjectList(object):
                         self._relationship_dict[daughter] = {}
 
                     self._relationship_dict[daughter][parent] = ans
+
+
 
 
 

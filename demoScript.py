@@ -2,7 +2,7 @@ from EADBWrapper import EADBWrapper, SysMLObject
 
 if __name__ == "__main__":
 
-    objectName = 'm3Presciption'
+    objectName = 'm1Prescription'
 
     dbo = EADBWrapper()
     objid = dbo.objectIdFromName(objectName)
