@@ -83,7 +83,7 @@ class SysMLObject(object):
                      ('Const', str, 300),
                      ('Style', str, 300),
                      ('Classifier', str, 300),
-                     ('Default', np.float),
+                     ('Default', str, 300),
                      ('Type', str, 300),
                      ('ea_guid', str, 300),
                      ('StyleEx', str, 300)
@@ -175,6 +175,22 @@ class SysMLObject(object):
         """
 
         return self._attributes
+
+
+    def printObject(self):
+        print self._name
+        print self._version
+        for pp in self._properties:
+            print 'Property: ',pp
+            print 'Value: ',self._properties[pp]['Value']
+            if self._properties[pp]['Notes'] != 'None':
+                print self._properties[pp]['Notes']
+
+        for aa in self._attributes:
+            print '\n    ',aa,' = ',self._attributes[aa]['Default'],' ',self._attributes[aa]['Type']
+            if self._attributes[aa]['Notes'] != 'None':
+                print '    ',self._attributes[aa]['Notes']
+
 
 
 class SysMLObjectList(object):
