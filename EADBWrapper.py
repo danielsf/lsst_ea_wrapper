@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib import pyplot as plt
 from lsst.sims.catalogs.generation.db import DBObject
 
 __all__ = ["EADBWrapper", "SysMLObject", "SysMLObjectList"]
@@ -188,6 +189,7 @@ class SysMLObjectList(object):
         self._relationship_dict = {}
 
         parents_of_objects = []
+        id_list = []
         self._id_dict = {}
         self._name_dict = {}
         for ix, obj in enumerate(self._objectList):
@@ -200,6 +202,7 @@ class SysMLObjectList(object):
             self._id_dict[obj.objid] = ix
             self._name_dict[obj.name] = ix
             parents_of_objects.append(obj.parent)
+            id_list.append(obj.objid)
 
 
         self._list_of_parents = [] # list of objects contained that are parents
@@ -209,6 +212,11 @@ class SysMLObjectList(object):
                 self._list_of_parents.append(obj.objid)
             else:
                 self._list_of_children.append(obj.objid)
+
+        self._list_of_grandparents = [] # list of objects contained whose parents are not contained
+        for ix in self._list_of_parents:
+            if self[ix].parent not in id_list:
+                self._list_of_grandparents.append(self[ix].objid)
 
         self._getRelationships(dbo)
 
