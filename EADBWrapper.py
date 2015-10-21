@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from matplotlib import pyplot as plt
 from lsst.sims.catalogs.generation.db import DBObject
@@ -177,22 +178,30 @@ class SysMLObject(object):
         return self._attributes
 
 
-    def printObject(self):
-        print '********'
-        print 'Name: ',self._name
-        print 'Version: ',self._version
-        print 'Author: ',self._author
+    def printObject(self, file_handle=sys.stdout):
+        file_handle.write('********\n')
+        file_handle.write('Name: %s\n' % self._name)
+        file_handle.write('Version: %s\n' % self._version)
+        file_handle.write('Author: %s\n' % self._author)
+        self.printProperties(file_handle=file_handle)
+        self.printAttributes(file_handle=file_handle)
+        file_handle.write('********\n')
+    
+    
+    def printProperties(self, file_handle=sys.stdout):
         for pp in self._properties:
-            print 'Property: ',pp
-            print 'Value: ',self._properties[pp]['Value']
+            file_handle.write('Property: %s\n' % pp)
+            file_handle.write('Value: %s\n' % self._properties[pp]['Value'])
             if self._properties[pp]['Notes'] != 'None':
-                print self._properties[pp]['Notes']
+                file_handle.write('%s\n' % self._properties[pp]['Notes'])
 
+    def printAttributes(self, file_handle=sys.stdout):
+        file_handle.write('Attributes:\n')
         for aa in self._attributes:
-            print '    ------------'
-            print '    ',aa,' = ',self._attributes[aa]['Default'],' ',self._attributes[aa]['Type']
+            file_handle.write('    ------------\n')
+            file_handle.write('    %s = %s %s\n' % (aa,self._attributes[aa]['Default'], self._attributes[aa]['Type']))
             if self._attributes[aa]['Notes'] != 'None':
-                print '    ',self._attributes[aa]['Notes']
+                file_handle.write('    %s\n' % self._attributes[aa]['Notes'])
 
 
 
