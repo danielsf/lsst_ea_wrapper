@@ -362,6 +362,12 @@ class EADBWrapper(object):
         return ans
 
 
+    def writeFamilyTree(self, name, author=None, version=None, file_handle=sys.stdout):
+        objIdList = self.getFamilyIDs(name, author=author, version=version)
+        objList = SysMLObjectList(self, objIdList)
+        objList.writeFamilyTree(file_handle=file_handle)
+
+
     def getFamilyIDs(self, name, author=None, version=None):
         """
         Get a list of the Object_IDs of all objects descended (directly or
