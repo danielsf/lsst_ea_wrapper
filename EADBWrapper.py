@@ -186,8 +186,8 @@ class SysMLObject(object):
         self.printProperties(file_handle=file_handle)
         self.printAttributes(file_handle=file_handle)
         file_handle.write('********\n')
-    
-    
+
+
     def printProperties(self, file_handle=sys.stdout):
         for pp in self._properties:
             file_handle.write('Property: %s\n' % pp)
