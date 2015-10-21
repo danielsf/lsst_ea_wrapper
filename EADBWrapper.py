@@ -363,6 +363,21 @@ class EADBWrapper(object):
 
 
     def writeFamilyTree(self, name, author=None, version=None, file_handle=sys.stdout):
+        """
+        Write out all of the objects descended from <name>
+
+        @param[in] name is a string denoting the name of the desired object
+
+        @param[in] author is an optional string denoting the author of the
+        desired object (in case there are multiple versions)
+
+        @param[in] version is an optional string denoting the version
+        of the desired object (in case there are multiple versions)
+
+        @param[in] file_handle points to the output file (default is stdout)
+
+        This method writes its results to the destination specified by file_handle
+        """
         objIdList = self.getFamilyIDs(name, author=author, version=version)
         objList = SysMLObjectList(self, objIdList)
         objList.writeFamilyTree(file_handle=file_handle)
