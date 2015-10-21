@@ -178,8 +178,9 @@ class SysMLObject(object):
 
 
     def printObject(self):
-        print self._name
-        print self._version
+        print 'Name: ',self._name
+        print 'Version: ',self._version
+        print 'Author: ',self._author
         for pp in self._properties:
             print 'Property: ',pp
             print 'Value: ',self._properties[pp]['Value']
@@ -187,7 +188,8 @@ class SysMLObject(object):
                 print self._properties[pp]['Notes']
 
         for aa in self._attributes:
-            print '\n    ',aa,' = ',self._attributes[aa]['Default'],' ',self._attributes[aa]['Type']
+            print '    ------------'
+            print '    ',aa,' = ',self._attributes[aa]['Default'],' ',self._attributes[aa]['Type']
             if self._attributes[aa]['Notes'] != 'None':
                 print '    ',self._attributes[aa]['Notes']
 
