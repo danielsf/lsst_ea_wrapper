@@ -378,12 +378,18 @@ class EADBWrapper(object):
 
         This method writes its results to the destination specified by file_handle
         """
-        objIdList = self.getFamilyIDs(name, author=author, version=version)
+        objIdList = self.getFamilyIDs(name=name, author=author, version=version)
         objList = SysMLObjectList(self, objIdList)
         objList.writeFamilyTree(file_handle=file_handle)
 
 
-    def getFamilyIDs(self, name, author=None, version=None):
+    def writeFamilyTreeFromID(self, objid, file_handle=sys.stdout):
+        objIdList = self.getFamilyIDs(objid=objid)
+        objList = SysMLObjectList(self, objIdList)
+        objList.writeFamilyTree(file_handle=file_handle)
+
+
+    def getFamilyIDs(self, name=None, author=None, version=None, objid=None):
         """
         Get a list of the Object_IDs of all objects descended (directly or
         indirectly) from a specified object
@@ -396,15 +402,23 @@ class EADBWrapper(object):
         @param[in] version is an optional string denoting the version
         of the desired object (in case there are multiple versions)
 
+        @param[in] objid is an optional integer denoting the Object_ID of the
+        object whose tree you want to write out (if you already know it)
+
         @param[out] a list of ints denoting the Object_IDs of all of
         the objects beneath the desired object in its family tree.
         """
-        query = self._object_query + " where t.name='%s'" % name
+        
+        if objid is None:
+            query = self._object_query + " where t.name='%s'" % name
 
-        if author is not None:
-            query += " and t.Author='%s'" % author
-        if version is not None:
-            query += " and t.Version='%s'" % version
+            if author is not None:
+                query += " and t.Author='%s'" % author
+            if version is not None:
+                query += " and t.Version='%s'" % version
+
+        else:
+            query = self._object_query + " where t.Object_ID=%d" % objid
 
         results = self._dbo.execute_arbitrary(query, dtype=self._object_dtype)
 
