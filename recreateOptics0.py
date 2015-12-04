@@ -141,6 +141,6 @@ if __name__ == "__main__":
             for surface in surface_list:
                 output_file.write('%s %s ' % (surface[0], surface[1]))
                 for ix in range(2, 15):
-                    output_file.write('%.3f ' % surface[ix])
+                    output_file.write('%.3e ' % surface[ix])
                 output_file.write('%s %s\n' % (surface[15], surface[16]))
 
