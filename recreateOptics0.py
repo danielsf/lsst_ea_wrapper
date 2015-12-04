@@ -70,19 +70,21 @@ def parseLensesAndMirrors(obj):
     for att_name in obj.attributes:
         notes = obj.attributes[att_name]['Notes']
         value = obj.attributes[att_name]['Default']
+        if 'Infinite' in value:
+            value = 0.0
         units = obj.attributes[att_name]['Type']
         active_surface = first_surface
         if 'second surface' in notes:
             active_surface = second_surface
 
-        if 'radius of curvature' in notes:
+        if 'radius of curvature' in notes or 'radius of the' in notes:
             active_surface[2] = np.abs(np.float(value))
 
         elif 'clear aperture' in notes:
-            if 'outer' in notes:
-                dex = 4
-            else:
+            if 'inner' in notes:
                 dex = 5
+            else:
+                dex = 4
 
             if 'diameter' in notes:
                 factor = 0.5
@@ -134,13 +136,14 @@ if __name__ == "__main__":
 
     with open('trial_optics_1.txt', 'w') as output_file:
         for name in id_dict:
-            output_file.write('\n%s %d\n' % (name, id_dict[name]))
             obj = SysMLObject()
             obj.getData(dbo, id_dict[name])
             surface_list = parseLensesAndMirrors(obj)
             for surface in surface_list:
                 output_file.write('%s %s ' % (surface[0], surface[1]))
-                for ix in range(2, 15):
-                    output_file.write('%.3e ' % surface[ix])
+                for ix in range(2, 7):
+                    output_file.write('%.3f ' % surface[ix])
+                for ix in range(7,15):
+                    output_file.write('%.4e ' % surface[ix])
                 output_file.write('%s %s\n' % (surface[15], surface[16]))
 
