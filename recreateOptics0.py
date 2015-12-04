@@ -4,7 +4,7 @@ import re
 from EADBWrapper import EADBWrapper, SysMLObject
 from collections import OrderedDict
 
-def parseLensesAndMirrors(obj):
+def parseComponents(obj, bandpass):
     """
     Read in a SysMLObject and divide it into a list of parameters in the order
     and units expected for optics_0.txt
@@ -14,6 +14,8 @@ def parseLensesAndMirrors(obj):
 
     Results returned as a list of lists.
     """
+
+    bandpass_to_dex = {'u':0, 'g':1, 'r':2, 'i':3, 'z':4, 'y':5}
 
     output = []
     first_surface = []
@@ -25,9 +27,11 @@ def parseLensesAndMirrors(obj):
             break
 
     name_root = None
-    allowed = ('L1', 'L2', 'L3', 'M1', 'M2', 'M3')
+    allowed = ('L1', 'L2', 'L3', 'M1', 'M2', 'M3', 'F')
     for att in obj.attributes:
         name = att[:2].upper()
+        if name[0] is 'F':
+            name = 'F'
         if name in allowed:
             name_root = name
             break
@@ -39,7 +43,7 @@ def parseLensesAndMirrors(obj):
     if second_surface is not None:
         second_surface.append(name_root+"E")
 
-    type_dict = {'L':'lens', 'M':'mirror'}
+    type_dict = {'L':'lens', 'M':'mirror', 'F':'filter'}
     first_surface.append(type_dict[name_root[0]])
     if second_surface is not None:
         second_surface.append(type_dict[name_root[0]])
@@ -59,6 +63,9 @@ def parseLensesAndMirrors(obj):
         media_dict[ll] = ('lenses.txt', 'silica_dispersion.txt')
         media_dict[ll+'E'] = ('lenses.txt', 'air')
 
+    media_dict['F'] = ('filter_%d.txt' % bandpass_to_dex[bandpass], 'silica_dispersion.txt')
+    media_dict['FE'] = ('none', 'air')
+
     first_surface.append(media_dict[first_surface[0]][0])
     first_surface.append(media_dict[first_surface[0]][1])
     if second_surface is not None:
@@ -70,6 +77,11 @@ def parseLensesAndMirrors(obj):
     for att_name in obj.attributes:
         notes = obj.attributes[att_name]['Notes']
         value = obj.attributes[att_name]['Default']
+        
+        if 'filter' in att_name:
+            if '-band' in notes and '%s-band' % bandpass not in notes:
+                continue
+
         if 'Infinite' in value:
             value = 0.0
         units = obj.attributes[att_name]['Type']
@@ -93,7 +105,7 @@ def parseLensesAndMirrors(obj):
 
             active_surface[dex] = factor*np.abs(np.float(value))
 
-        elif 'thickness' in notes:
+        elif 'thicknes' in notes:
             if second_surface is not None:
                 active_surface = second_surface
 
@@ -138,7 +150,7 @@ if __name__ == "__main__":
         for name in id_dict:
             obj = SysMLObject()
             obj.getData(dbo, id_dict[name])
-            surface_list = parseLensesAndMirrors(obj)
+            surface_list = parseComponents(obj, 'u')
             for surface in surface_list:
                 output_file.write('%s %s ' % (surface[0], surface[1]))
                 for ix in range(2, 7):
