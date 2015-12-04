@@ -77,7 +77,7 @@ def parseComponents(obj, bandpass):
     for att_name in obj.attributes:
         notes = obj.attributes[att_name]['Notes']
         value = obj.attributes[att_name]['Default']
-        
+
         if 'filter' in att_name:
             if '-band' in notes and '%s-band' % bandpass not in notes:
                 continue
@@ -146,16 +146,18 @@ if __name__ == "__main__":
     id_dict['filter'] = 385275
     id_dict['l3'] = 385276
 
-    with open('trial_optics_1.txt', 'w') as output_file:
-        for name in id_dict:
-            obj = SysMLObject()
-            obj.getData(dbo, id_dict[name])
-            surface_list = parseComponents(obj, 'u')
-            for surface in surface_list:
-                output_file.write('%s %s ' % (surface[0], surface[1]))
-                for ix in range(2, 7):
-                    output_file.write('%.3f ' % surface[ix])
-                for ix in range(7,15):
-                    output_file.write('%.4e ' % surface[ix])
-                output_file.write('%s %s\n' % (surface[15], surface[16]))
+    for ibp, bandpass in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
+
+        with open('test_optics_%d.txt' % ibp, 'w') as output_file:
+            for name in id_dict:
+                obj = SysMLObject()
+                obj.getData(dbo, id_dict[name])
+                surface_list = parseComponents(obj, bandpass)
+                for surface in surface_list:
+                    output_file.write('%s %s ' % (surface[0], surface[1]))
+                    for ix in range(2, 7):
+                        output_file.write('%.3f ' % surface[ix])
+                    for ix in range(7,15):
+                        output_file.write('%.4e ' % surface[ix])
+                    output_file.write('%s %s\n' % (surface[15], surface[16]))
 
