@@ -284,9 +284,9 @@ class SysMLObjectList(object):
 
                 results = dbo._dbo.execute_arbitrary(query, dtype=dtype)
 
-                if len(results)>1:
-                    raise RuntimeError("Your relationship query between %d and %d yielded %d results." \
-                                       %(daughter, parent, len(results)))
+                #if len(results)>1:
+                #    raise RuntimeError("Your relationship query between %d and %d yielded %d results." \
+                #                       %(daughter, parent, len(results)))
 
 
                 if len(results)>0:
