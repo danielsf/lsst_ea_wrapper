@@ -16,8 +16,24 @@ if __name__ == "__main__":
                       + "t.Value, t.Notes from t_objectproperties t " \
                       + "where t.Property like '%lsstrequire%'"
 
-    results = dbo.execute_arbitrary(property_query, dtype=property_dtype)
-    print results
-    print len(results)
+    property_results = dbo.execute_arbitrary(property_query,
+                                             dtype=property_dtype)
 
+    property_id_list = property_results['Object_ID']
+
+    connection_dtype = np.dtype([('Btm_Mid_Label', str, 300),
+                                ('Start_Object_ID', np.int),
+                                ('End_Object_ID', np.int)])
+
+    connection_query = "select c.Btm_Mid_Label, c.Start_Object_ID, " \
+                       + "c.End_Object_ID from t_connector c " \
+                       + "inner join t_objectproperties p " \
+                       + "on p.Object_ID = c.Start_Object_ID " \
+                       + "where p.Property like '%lsstrequire%'"
+
+    result = dbo.execute_arbitrary(connection_query,
+                                   dtype=connection_dtype)
+
+    print result
+    print len(result)
 
