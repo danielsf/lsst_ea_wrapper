@@ -18,7 +18,7 @@ if __name__ == "__main__":
                        + "c.End_Object_ID from t_connector c " \
                        + "inner join t_objectproperties p " \
                        + "on p.Object_ID = c.Start_Object_ID " \
-                       + "where p.Property like '%lsstrequire%'"
+                       + "where p.Property like '%require%'"
 
     connection_list = dbo.execute_arbitrary(connection_query,
                                            dtype=connection_dtype)
@@ -36,7 +36,7 @@ if __name__ == "__main__":
                    + "or c.Start_Object_ID=o.Object_ID " \
                    + "inner join t_objectproperties p " \
                    + "on p.Object_ID = c.Start_Object_ID " \
-                   + "where p.Property like '%lsstrequire%'"
+                   + "where p.Property like '%require%'"
 
     object_list = dbo.execute_arbitrary(object_query,
                                         dtype=object_dtype)
@@ -47,12 +47,16 @@ if __name__ == "__main__":
             cc = connection['Btm_Mid_Label'].replace('\r','')
             cc = cc.replace('\n', '')
             cc = cc.strip()
-            if cc != 'None':
-            
+
+            # only print relationships which are 'refine' or 'derive' (or 'deriveRqt')
+            if 'refine' in cc or 'derive' in cc:           
                 start_dex = np.where(object_list['Object_ID'] == connection['Start_Object_ID'])[0][0]
                 end_dex = np.where(object_list['Object_ID'] == connection['End_Object_ID'])[0][0]
+
                 start_name = object_list['Name'][start_dex].replace('\n','')
                 start_name = start_name.replace('\r', '')
+                start_name = start_name.replace('\r\n', '')
                 end_name = object_list['Name'][end_dex].replace('\n','')
                 end_name = end_name.replace('\r', '')
-                output_file.write("%s %s %s\n" % (start_name, cc, end_name))
+                end_name = end_name.replace('\r\n', '')
+                output_file.write("%s --%s--> %s\n" % (start_name, cc, end_name))
