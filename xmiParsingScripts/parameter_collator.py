@@ -1,5 +1,6 @@
 from __future__ import with_statement
 import os
+import sys
 import xml.etree.ElementTree as etree
 
 prefix = "{http://schema.omg.org/spec/XMI/2.1}"
@@ -30,26 +31,56 @@ def format_documentation(doc_string):
 class ParameterTree(object):
 
     def __init__(self, fileName):
-        self.documentation_dict = {}
-        self.units_dict = {}
-        self.value_dict = {}
-        self.tree = etree.parse(fileName)
-        self.generate_documentation(self.tree)
-        self.get_values(self.tree)
+        tree = etree.parse(fileName)
+        doc_dict, units_dict = self.generate_documentation_dict(tree)
+        values_dict = self.get_values(tree)
+
+        self.parameter_dict = {}
+        for param_name in values_dict:
+            local_dict = {}
+            local_dict['values'] = values_dict[param_name]
+            if param_name in doc_dict:
+                local_dict['documentation'] = format_documentation(doc_dict[param_name])
+            if param_name in units_dict:
+                local_dict['units'] = units_dict[param_name]
+            else:
+                local_dict['units'] = ''
+
+            self.parameter_dict[param_name] = local_dict
 
 
-    def generate_documentation(self, tree):
+    def write_parameter(self, param_name, handle=sys.stdout):
+        if param_name not in self.parameter_dict:
+            return
+        local_dict = self.parameter_dict[param_name]
+        handle.write('\n%s\n' % param_name)
+        if 'documentation' in local_dict:
+            handle.write('%s\n' % local_dict['documentation'])
+        handle.write('####\n')
+        for val_name in local_dict['values']:
+            vv = local_dict['values'][val_name]
+            if isinstance(vv, unicode):
+                vv = vv.encode(errors='ignore')
+            handle.write(val_name+': '+str(vv)+' '+str(local_dict['units'])+'\n')
+
+
+    def generate_documentation_dict(self, tree):
         """
         Walk through an element tree, adding attributes to _documentation_dict
         """
+
+        documentation_dict = {}
+        units_dict = {}
 
         for ee in tree.iter():
             if ee.tag == 'attribute':
                 for ii in ee:
                     if ii.tag== 'documentation' and 'value' in ii.attrib:
-                        self.documentation_dict[ee.attrib['name']] = ii.attrib['value']
+                        documentation_dict[ee.attrib['name']] = ii.attrib['value']
                     if ii.tag == 'properties' and 'type' in ii.attrib:
-                        self.units_dict[ee.attrib['name']] = ii.attrib['type']
+                        units_dict[ee.attrib['name']] = ii.attrib['type']
+
+        return documentation_dict, units_dict
 
 
     def get_values(self, tree):
@@ -57,13 +88,16 @@ class ParameterTree(object):
         Walk through an element tree, finding all of the nestedClassifiers
         and getting their values
         """
+        value_dict = {}
 
         for ee in tree.iter():
             if ee.tag == 'ownedAttribute' and 'name' in ee.attrib:
                 name = ee.attrib['name']
                 local_value_dict = self._get_values(ee)
                 if local_value_dict is not None:
-                    self.value_dict[name] = local_value_dict
+                    value_dict[name] = local_value_dict
+
+        return value_dict
 
 
     def _get_values(self, element):
@@ -109,7 +143,7 @@ if __name__ == "__main__":
 
             local_tree = tree_dict[file_name]
 
-            for param_name in local_tree.value_dict:
+            for param_name in local_tree.parameter_dict:
                 if param_name in printed_params:
                     print "WARNING %s in %s and %s\n" \
                     % (param_name, file_name, printed_params[param_name])
@@ -118,20 +152,4 @@ if __name__ == "__main__":
                 else:
                     printed_params[param_name] = [file_name]
 
-                output_file.write("\n%s\n" % param_name)
-                if param_name in local_tree.documentation_dict:
-                    doc_string = format_documentation(local_tree.documentation_dict[param_name])
-                    output_file.write("%s\n" % doc_string)
-                    output_file.write("    ####\n")
-
-                for val_name in local_tree.value_dict[param_name]:
-                    val = local_tree.value_dict[param_name][val_name]
-                    if isinstance(val, unicode):
-                        val = val.encode(errors='ignore')
-
-                    if param_name in local_tree.units_dict:
-                        uu = local_tree.units_dict[param_name]
-                    else:
-                        uu = ''
-
-                    output_file.write("    "+str(val_name)+": "+str(val)+" "+str(uu)+"\n")
+                local_tree.write_parameter(param_name, output_file)
