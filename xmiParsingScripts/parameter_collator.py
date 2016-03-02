@@ -31,7 +31,8 @@ def format_documentation(doc_string):
 class ParameterTree(object):
 
     def __init__(self, file_name):
-        self.file_name = file_name
+        words = file_name.split('/')
+        self.file_name = words[-1]
         tree = etree.parse(file_name)
         doc_dict, units_dict = self.generate_documentation_dict(tree)
         values_dict = self.get_values(tree)
@@ -131,18 +132,18 @@ if __name__ == "__main__":
     data_dir = os.path.join(data_dir, "xmi", "systematic_data")
     list_of_file_names = os.listdir(data_dir)
 
-    tree_dict = {}
+    tree_list = []
     for file_name in list_of_file_names:
         local_tree = ParameterTree(os.path.join(data_dir, file_name))
-        tree_dict[file_name] = local_tree
+        tree_list.append(local_tree)
 
     printed_params = {}
 
     with open("test_output.sav", "w") as output_file:
 
-        for file_name in tree_dict:
+        for local_tree in tree_list:
 
-            local_tree = tree_dict[file_name]
+            file_name = local_tree.file_name
 
             for param_name in local_tree.parameter_dict:
                 if param_name in printed_params:
