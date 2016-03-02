@@ -28,20 +28,31 @@ def format_documentation(doc_string):
     return output_str
 
 
-def write_keyword_params(list_of_trees, keyword, handle=sys.stdout):
-
+def _should_be_written(parameter_dict, param_name, keyword):
     key = keyword.lower()
+    if key in param_name:
+        return True
+
+    if 'documentation' in parameter_dict[param_name]:
+        if key in parameter_dict[param_name]['documentation']:
+            return True
+
+    return False
+
+
+def write_keyword_params(list_of_trees, keyword, handle=sys.stdout):
 
     for local_tree in list_of_trees:
         for param_name in local_tree.parameter_dict:
-            p_tree = local_tree.parameter_dict[param_name]
             write_it = False
-            if key in param_name:
-                write_it = True
+            if isinstance(keyword, list):
+                for key in keyword:
+                    write_it = _should_be_written(local_tree.parameter_dict, param_name, key)
+                    if write_it:
+                        break
 
-            if 'documentation' in p_tree:
-                if key in p_tree['documentation']:
-                    write_it = True
+            else:
+                write_it = _should_be_written(local_tree.parameter_dict, param_name, keyword)
 
             if write_it:
                 local_tree.write_parameter(param_name, handle=handle)
@@ -178,5 +189,4 @@ if __name__ == "__main__":
                 local_tree.write_parameter(param_name, output_file)
 
     with open("test_rotator_parameters.sav", "w") as output_file:
-        write_keyword_params(tree_list, 'rotator', output_file)
-        write_keyword_params(tree_list, 'rotation', output_file)
+        write_keyword_params(tree_list, ['rotator', 'rotation'], output_file)
