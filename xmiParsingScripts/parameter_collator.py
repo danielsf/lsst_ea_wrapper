@@ -56,12 +56,12 @@ class ParameterTree(object):
         handle.write('\n%s\n' % param_name)
         if 'documentation' in local_dict:
             handle.write('%s\n' % local_dict['documentation'])
-        handle.write('####\n')
+        handle.write('    ####\n')
         for val_name in local_dict['values']:
             vv = local_dict['values'][val_name]
             if isinstance(vv, unicode):
                 vv = vv.encode(errors='ignore')
-            handle.write(val_name+': '+str(vv)+' '+str(local_dict['units'])+'\n')
+            handle.write('    '+val_name+': '+str(vv)+' '+str(local_dict['units'])+'\n')
 
 
     def generate_documentation_dict(self, tree):
