@@ -30,8 +30,9 @@ def format_documentation(doc_string):
 
 class ParameterTree(object):
 
-    def __init__(self, fileName):
-        tree = etree.parse(fileName)
+    def __init__(self, file_name):
+        self.file_name = file_name
+        tree = etree.parse(file_name)
         doc_dict, units_dict = self.generate_documentation_dict(tree)
         values_dict = self.get_values(tree)
 
