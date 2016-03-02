@@ -83,6 +83,8 @@ class ParameterTree(object):
             if isinstance(vv, unicode):
                 vv = vv.encode(errors='ignore')
             handle.write('    '+val_name+': '+str(vv)+' '+str(local_dict['units'])+'\n')
+        handle.write('    ####\n')
+        handle.write('    source file: '+self.file_name+'\n')
 
 
     def generate_documentation_dict(self, tree):
