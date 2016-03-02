@@ -30,11 +30,11 @@ def format_documentation(doc_string):
 
 def _should_be_written(parameter_dict, param_name, keyword):
     key = keyword.lower()
-    if key in param_name:
+    if key in param_name.lower():
         return True
 
     if 'documentation' in parameter_dict[param_name]:
-        if key in parameter_dict[param_name]['documentation']:
+        if key in parameter_dict[param_name]['documentation'].lower():
             return True
 
     return False
