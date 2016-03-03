@@ -28,13 +28,13 @@ def format_documentation(doc_string):
     return output_str
 
 
-def _should_be_written(parameter_dict, param_name, keyword):
+def _should_be_written(parameter, keyword):
     key = keyword.lower()
-    if key in param_name.lower():
+    if key in parameter.name.lower():
         return True
 
-    if 'documentation' in parameter_dict[param_name]:
-        if key in parameter_dict[param_name]['documentation'].lower():
+    if parameter.doc is not None:
+        if key in parameter.doc.lower():
             return True
 
     return False
@@ -43,19 +43,83 @@ def _should_be_written(parameter_dict, param_name, keyword):
 def write_keyword_params(list_of_trees, keyword, handle=sys.stdout):
 
     for local_tree in list_of_trees:
-        for param_name in local_tree.parameter_dict:
+        for param in local_tree.parameter_list:
             write_it = False
             if isinstance(keyword, list):
                 for key in keyword:
-                    write_it = _should_be_written(local_tree.parameter_dict, param_name, key)
+                    write_it = _should_be_written(param, key)
                     if write_it:
                         break
 
             else:
-                write_it = _should_be_written(local_tree.parameter_dict, param_name, keyword)
+                write_it = _should_be_written(param, keyword)
 
             if write_it:
-                local_tree.write_parameter(param_name, handle=handle)
+                param.write_param(handle=handle)
+
+
+
+class Parameter(object):
+
+    def __init__(self, name, doc=None, units=None, values=None, source=None):
+        self._name = name
+        if doc is not None:
+            self._doc = format_documentation(doc)
+        else:
+            self._doc = None
+
+        if units is not None:
+            self._units = units
+        else:
+            self._units = ''
+
+        if source is not None:
+            words = source.split('/')
+            self._source = words[-1]
+        else:
+            self._source = None
+
+        self._values = {}
+        for val_name in values:
+            vv = values[val_name]
+            if isinstance(vv, unicode):
+                vv = vv.encode(errors='ignore')
+
+            self._values[val_name] = vv
+
+
+    def write_param(self, handle=sys.stdout):
+        handle.write("\n%s\n" % self._name)
+        if self._doc is not None:
+            handle.write("%s\n" % self._doc)
+
+        handle.write("    ####\n")
+        for val_name in self._values:
+            handle.write("    "+val_name+": "+self._values[val_name]
+                         +" "+self._units+"\n")
+
+        handle.write("    ####\n")
+        handle.write("    %s\n" % self._source)
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def doc(self):
+        return self._doc
+
+    @property
+    def units(self):
+        return self._units
+
+    @property
+    def source(self):
+        return self._source
+
+    @property
+    def values(self):
+        return self._values
 
 
 class ParameterTree(object):
@@ -67,35 +131,22 @@ class ParameterTree(object):
         doc_dict, units_dict = self.generate_documentation_dict(tree)
         values_dict = self.get_values(tree)
 
-        self.parameter_dict = {}
+        self.parameter_list = []
+
         for param_name in values_dict:
-            local_dict = {}
-            local_dict['values'] = values_dict[param_name]
             if param_name in doc_dict:
-                local_dict['documentation'] = format_documentation(doc_dict[param_name])
-            if param_name in units_dict:
-                local_dict['units'] = units_dict[param_name]
+                doc = doc_dict[param_name]
             else:
-                local_dict['units'] = ''
+                doc = None
+            if param_name in units_dict:
+                units = units_dict[param_name]
+            else:
+                units = None
 
-            self.parameter_dict[param_name] = local_dict
+            pp = Parameter(param_name, doc=doc, units=units, values=values_dict[param_name],
+                           source=file_name)
 
-
-    def write_parameter(self, param_name, handle=sys.stdout):
-        if param_name not in self.parameter_dict:
-            return
-        local_dict = self.parameter_dict[param_name]
-        handle.write('\n%s\n' % param_name)
-        if 'documentation' in local_dict:
-            handle.write('%s\n' % local_dict['documentation'])
-        handle.write('    ####\n')
-        for val_name in local_dict['values']:
-            vv = local_dict['values'][val_name]
-            if isinstance(vv, unicode):
-                vv = vv.encode(errors='ignore')
-            handle.write('    '+val_name+': '+str(vv)+' '+str(local_dict['units'])+'\n')
-        handle.write('    ####\n')
-        handle.write('    source file: '+self.file_name+'\n')
+            self.parameter_list.append(pp)
 
 
     def generate_documentation_dict(self, tree):
@@ -177,16 +228,8 @@ if __name__ == "__main__":
 
             file_name = local_tree.file_name
 
-            for param_name in local_tree.parameter_dict:
-                if param_name in printed_params:
-                    print "WARNING %s in %s and %s\n" \
-                    % (param_name, file_name, printed_params[param_name])
-
-                    printed_params[param_name].append(file_name)
-                else:
-                    printed_params[param_name] = [file_name]
-
-                local_tree.write_parameter(param_name, output_file)
+            for param in local_tree.parameter_list:
+                param.write_param(output_file)
 
     with open("test_rotator_parameters.sav", "w") as output_file:
         write_keyword_params(tree_list, ['rotator', 'rotation'], output_file)
