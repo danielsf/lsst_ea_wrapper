@@ -40,22 +40,21 @@ def _should_be_written(parameter, keyword):
     return False
 
 
-def write_keyword_params(list_of_trees, keyword, handle=sys.stdout):
+def write_keyword_params(list_of_params, keyword, handle=sys.stdout):
 
-    for local_tree in list_of_trees:
-        for param in local_tree.parameter_list:
-            write_it = False
-            if isinstance(keyword, list):
-                for key in keyword:
-                    write_it = _should_be_written(param, key)
-                    if write_it:
-                        break
+    for param in list_of_params:
+        write_it = False
+        if isinstance(keyword, list):
+            for key in keyword:
+                write_it = _should_be_written(param, key)
+                if write_it:
+                    break
 
-            else:
-                write_it = _should_be_written(param, keyword)
+        else:
+            write_it = _should_be_written(param, keyword)
 
-            if write_it:
-                param.write_param(handle=handle)
+        if write_it:
+            param.write_param(handle=handle)
 
 
 
@@ -226,10 +225,17 @@ if __name__ == "__main__":
 
         for local_tree in tree_list:
 
-            file_name = local_tree.file_name
-
             for param in local_tree.parameter_list:
                 param.write_param(output_file)
 
+                if param.name not in printed_params:
+                    printed_params[param.name] = [param.source]
+                else:
+                    print "WARNING %s in %s and %s" % \
+                    (param.name, param.source, printed_params[param.name])
+
+                    printed_params[param.name].append(param.source)
+
     with open("test_rotator_parameters.sav", "w") as output_file:
-        write_keyword_params(tree_list, ['rotator', 'rotation'], output_file)
+        for local_tree in tree_list:
+            write_keyword_params(local_tree.parameter_list, ['rotator', 'rotation'], output_file)
