@@ -236,6 +236,8 @@ if __name__ == "__main__":
 
                     printed_params[param.name].append(param.source)
 
-    with open("test_rotator_parameters.sav", "w") as output_file:
+    with open("test_kinematic_parameters.sav", "w") as output_file:
         for local_tree in tree_list:
-            write_keyword_params(local_tree.parameter_list, ['rotator', 'rotation'], output_file)
+            write_keyword_params(local_tree.parameter_list,
+                                ['rotator', 'rotation', 'accel', 'veloc'],
+                                output_file)
