@@ -3,7 +3,7 @@ import os
 
 from ParameterDB_constructor import parameter_db_name
 
-__all__ = ["get_table_names"]
+__all__ = ["get_table_names", "get_column_names"]
 
 class connection_cache(object):
 
@@ -28,3 +28,14 @@ def get_table_names(db_name):
     results = cursor.fetchall()
     return results
 
+
+def get_column_names(db_name, table_name):
+    if ')' in table_name:
+        raise RuntimeError("%s is not a valid table_name" % table_name)
+    cursor = _global_connection_cache.connect(db_name).cursor()
+    cursor.execute("PRAGMA table_info(%s)" % table_name)
+    raw_results = cursor.fetchall()
+    results = []
+    for rr in raw_results:
+        results.append(rr[1])
+    return results
