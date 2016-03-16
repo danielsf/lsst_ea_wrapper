@@ -3,9 +3,11 @@ import os
 
 from ParameterTree import Parameter
 
-__all__ = ["db_from_param_list"]
+__all__ = ["db_from_param_list", "parameter_db_name"]
 
-def db_from_param_list(param_list, file_name):
+parameter_db_name = "LSST_parameter_sqlite.db"
+
+def db_from_param_list(param_list, table_name, file_name=parameter_db_name):
 
     if os.path.exists(file_name):
         os.unlink(file_name)
@@ -14,12 +16,10 @@ def db_from_param_list(param_list, file_name):
 
     cc = conn.cursor()
 
-    cc.execute(
-        """CREATE TABLE parameters (name text, defaultValue text,
-                                    upperValue text, lowerValue text,
-                                    units text, docstring text)
-        """
-    )
+    cmd = """CREATE TABLE %s (name text, defaultValue text, """ % table_name \
+        + """upperValue text, lowerValue text, units text, docstring text)"""
+
+    cc.execute(cmd)
 
     conn.commit()
 
@@ -50,7 +50,7 @@ def db_from_param_list(param_list, file_name):
         else:
             units = 'NULL'
 
-        cc.execute("""INSERT INTO parameters VALUES(?, ?, ?, ?, ?, ?)""",
+        cc.execute("""INSERT INTO %s VALUES(?, ?, ?, ?, ?, ?)""" % table_name,
                    (name, default, upper, lower, units, doc))
 
     conn.commit()
