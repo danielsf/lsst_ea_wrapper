@@ -9,9 +9,6 @@ parameter_db_name = "LSST_parameter_sqlite.db"
 
 def db_from_param_list(param_list, table_name, file_name=parameter_db_name):
 
-    if os.path.exists(file_name):
-        os.unlink(file_name)
-
     conn = sqlite3.connect(file_name)
 
     cc = conn.cursor()
