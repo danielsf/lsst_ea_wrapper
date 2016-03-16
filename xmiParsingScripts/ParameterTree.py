@@ -63,7 +63,7 @@ class Parameter(object):
     def __init__(self, name, doc=None, units=None, values=None, source=None):
         self._name = name
         if doc is not None:
-            self._doc = format_documentation(doc)
+            self._doc = doc
         else:
             self._doc = None
 
