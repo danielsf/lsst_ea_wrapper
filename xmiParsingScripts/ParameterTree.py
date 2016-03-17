@@ -90,7 +90,7 @@ class Parameter(object):
     def write_param(self, handle=sys.stdout):
         handle.write("\n%s\n" % self._name)
         if self._doc is not None:
-            handle.write("%s\n" % self._doc)
+            handle.write("%s\n" % format_documentation(self._doc))
 
         handle.write("    ####\n")
         for val_name in self._values:
