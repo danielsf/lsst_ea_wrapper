@@ -45,17 +45,18 @@ def keyword_query(db_name, table_name, keyword_list):
     cmd = "SELECT * from %s" % table_name
     like_statement = None
     formatted_kw_list = []
+    list_of_chars = []
     for kw in keyword_list:
+        list_of_chars.append("%{}%".format(kw))
+        list_of_chars.append("%{}%".format(kw))
         if like_statement is None:
-            like_statement = " WHERE name LIKE ?"
+            like_statement = " WHERE name LIKE ? OR docstring like ?"
         else:
-            like_statement += " OR name LIKE ?"
+            like_statement += " OR name LIKE ? OR docstring like ?"
 
     cursor = _global_connection_cache.connect(db_name).cursor()
 
     cmd+=like_statement
-
-    list_of_chars = ["%{}%".format(kw) for kw in keyword_list]
 
     cursor.execute(cmd, tuple(list_of_chars))
     return cursor.fetchall()
