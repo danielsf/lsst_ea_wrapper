@@ -83,4 +83,8 @@ def keyword_query(db_name, table_name, keyword_list):
     cmd+=like_statement
 
     cursor.execute(cmd, tuple(list_of_chars))
-    return cursor.fetchall()
+    results = cursor.fetchall()
+    output = []
+    for rr in results:
+        output.append(_convert_row_to_parameter(rr))
+    return output
