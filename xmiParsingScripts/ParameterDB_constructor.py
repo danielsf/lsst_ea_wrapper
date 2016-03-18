@@ -14,7 +14,8 @@ def db_from_param_list(param_list, table_name, file_name=parameter_db_name):
     cc = conn.cursor()
 
     cmd = """CREATE TABLE %s (name text, defaultValue text, """ % table_name \
-        + """upperValue text, lowerValue text, units text, docstring text)"""
+        + """upperValue text, lowerValue text, units text, docstring text, """ \
+        + """source text)"""
 
     cc.execute(cmd)
 
@@ -47,8 +48,13 @@ def db_from_param_list(param_list, table_name, file_name=parameter_db_name):
         else:
             units = 'NULL'
 
-        cc.execute("""INSERT INTO %s VALUES(?, ?, ?, ?, ?, ?)""" % table_name,
-                   (name, default, upper, lower, units, doc))
+        if param.source is not None:
+            source = param.source
+        else:
+            source = 'NULL'
+
+        cc.execute("""INSERT INTO %s VALUES(?, ?, ?, ?, ?, ?, ?)""" % table_name,
+                   (name, default, upper, lower, units, doc, source))
 
     conn.commit()
     conn.close()
