@@ -1,6 +1,7 @@
 import sqlite3
 import os
 
+from ParameterTree import Parameter
 from ParameterDB_constructor import parameter_db_name
 
 __all__ = ["get_table_names", "get_column_names", "keyword_query"]
@@ -20,6 +21,29 @@ class connection_cache(object):
 
 _global_connection_cache = connection_cache()
 
+
+def _convert_row_to_parameter(row):
+    name = row[0]
+    values = {'defaultValue':row[1],
+               'upperValue':row[2],
+               'lowerValue':row[3]}
+
+    if str(row[4]) != 'NULL':
+        units = row[4]
+    else:
+        units = None
+
+    if str(row[5]) != 'NULL':
+        doc = row[5]
+    else:
+        doc = None
+
+    if str(row[6]) != 'NULL':
+        source = row[6]
+    else:
+        source = None
+
+    return Parameter(name, doc=doc, units=units, values=values, source=source)
 
 def get_table_names(db_name):
     cursor = _global_connection_cache.connect(db_name).cursor()
